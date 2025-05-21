@@ -5,6 +5,8 @@ import CONFIG
 import asyncio
 import logging
 import utils
+from collections.abc import Iterable
+
 
 from scraipe import Workflow
 from scraipe.extended import RedditLinkCollector, RedditSubmissionScraper, OpenAiAnalyzer
@@ -241,6 +243,20 @@ class App:
         # Display results if available
         if "export_df" in st.session_state:
             export_df = st.session_state.export_df
+            # Without pydantic validation, we need to manually ensure columns are strings or lists of strings
+            def to_str_or_str_list(x):
+                # leave strings alone
+                if isinstance(x, str):
+                    return x
+                # for any other iterable (list, tuple, set, etc.), convert each item to string
+                if isinstance(x, Iterable):
+                    return [str(item) for item in x]
+                # fallback: convert scalar to string
+                return str(x)
+            # apply function to all columns
+            for col in export_df.columns:
+                if col != "link":
+                    export_df[col] = export_df[col].apply(to_str_or_str_list)
             
             col_conf = {
                 "link": st.column_config.LinkColumn(width="small",),
