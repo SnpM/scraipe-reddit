@@ -51,73 +51,76 @@ class App:
         openai_api_key = ""
 
         # Credentials input section
-        with st.expander("Credentials", expanded=not (self.initial_reddit_valid and self.initial_openai_valid)):
-            # Feedback on Reddit credentials
-            feedback_container = st.empty()
+        @st.fragment()
+        def credentials_box():
+            with st.expander("Credentials", expanded=not (self.initial_reddit_valid and self.initial_openai_valid)):
+                # Feedback on Reddit credentials
+                feedback_container = st.empty()
+                    
+                st.markdown("You can find your Reddit API credentials [here](https://www.reddit.com/prefs/apps).")
                 
-            st.markdown("You can find your Reddit API credentials [here](https://www.reddit.com/prefs/apps).")
-            
-            # Configuration and test
-            reddit_client_id = st.text_input("Reddit Client ID", type="password", placeholder="Leave blank to use default")
-            reddit_client_secret = st.text_input("Reddit Client Secret", type="password", placeholder="Leave blank to use default")
-            
-            # Use default credentials if none provided
-            if reddit_client_id == "":
-                reddit_client_id = self.initial_reddit_client_id
-            if reddit_client_secret == "":
-                reddit_client_secret = self.initial_reddit_client_secret
-            
-            # Button to test and save Reddit credentials
-            if st.button("Save", key="reddit_test"):
-                st.session_state.reddit_valid = utils.test_reddit_creds(reddit_client_id, reddit_client_secret)
-                st.session_state.reddit_client_id = reddit_client_id
-                st.session_state.reddit_client_secret = reddit_client_secret
+                # Configuration and test
+                reddit_client_id = st.text_input("Reddit Client ID", type="password", placeholder="Leave blank to use default")
+                reddit_client_secret = st.text_input("Reddit Client Secret", type="password", placeholder="Leave blank to use default")
                 
-            # Render feedback for Reddit credentials
-            if "reddit_valid" in st.session_state:
-                reddit_valid = st.session_state.reddit_valid
-            else:
-                reddit_valid = self.initial_reddit_valid
-                                
-            if reddit_valid:
-                feedback_container.success("Reddit credentials are valid.")
-            else:
-                feedback_container.error("Reddit credentials are invalid.")
-            st.divider()
-            #===OpenAI configuration
-            # Feedback on OpenAI credentials
-            feedback_container = st.empty()
+                # Use default credentials if none provided
+                if reddit_client_id == "":
+                    reddit_client_id = self.initial_reddit_client_id
+                if reddit_client_secret == "":
+                    reddit_client_secret = self.initial_reddit_client_secret
                 
-            st.markdown("You can find your OpenAI API key [here](https://platform.openai.com/api-keys).")
-            
-            # Configuration and test
-            openai_api_key = st.text_input("OpenAI API Key", type="password", placeholder="Leave blank to use default")
-            
-            # Use default OpenAI key if none provided
-            if openai_api_key == "":
-                openai_api_key = self.initial_openai_api_key
-            
-            # Button to test and save OpenAI credentials
-            if st.button("Save", key="openai_test"):
-                st.session_state.openai_valid = utils.test_openai_creds(openai_api_key)
-                st.session_state.openai_api_key = openai_api_key
+                # Button to test and save Reddit credentials
+                if st.button("Save", key="reddit_test"):
+                    st.session_state.reddit_valid = utils.test_reddit_creds(reddit_client_id, reddit_client_secret)
+                    st.session_state.reddit_client_id = reddit_client_id
+                    st.session_state.reddit_client_secret = reddit_client_secret
+                    
+                # Render feedback for Reddit credentials
+                if "reddit_valid" in st.session_state:
+                    reddit_valid = st.session_state.reddit_valid
+                else:
+                    reddit_valid = self.initial_reddit_valid
+                                    
+                if reddit_valid:
+                    feedback_container.success("Reddit credentials are valid.")
+                else:
+                    feedback_container.error("Reddit credentials are invalid.")
+                st.divider()
+                #===OpenAI configuration
+                # Feedback on OpenAI credentials
+                feedback_container = st.empty()
+                    
+                st.markdown("You can find your OpenAI API key [here](https://platform.openai.com/api-keys).")
                 
-            # Render feedback for OpenAI credentials
-            if "openai_valid" in st.session_state:
-                openai_valid = st.session_state.openai_valid
-            else:
-                openai_valid = self.initial_openai_valid                
-            if openai_valid:
-                feedback_container.success("OpenAI credentials are valid.")
-            else:
-                feedback_container.error("OpenAI credentials are invalid.")
+                # Configuration and test
+                openai_api_key = st.text_input("OpenAI API Key", type="password", placeholder="Leave blank to use default")
+                
+                # Use default OpenAI key if none provided
+                if openai_api_key == "":
+                    openai_api_key = self.initial_openai_api_key
+                
+                # Button to test and save OpenAI credentials
+                if st.button("Save", key="openai_test"):
+                    st.session_state.openai_valid = utils.test_openai_creds(openai_api_key)
+                    st.session_state.openai_api_key = openai_api_key
+                    
+                # Render feedback for OpenAI credentials
+                if "openai_valid" in st.session_state:
+                    openai_valid = st.session_state.openai_valid
+                else:
+                    openai_valid = self.initial_openai_valid                
+                if openai_valid:
+                    feedback_container.success("OpenAI credentials are valid.")
+                else:
+                    feedback_container.error("OpenAI credentials are invalid.")
+        credentials_box()
                 
         #===Workflow configuration
         cols = st.columns([.55,.25,.2])
         # Input for subreddit names
         subreddit_names = cols[0].text_input("Subreddits", key="subreddit_names", placeholder="Enter subreddit names (e.g. r/bjj)")
         # Select sorting type for Reddit posts
-        sort_types = ["hot", "new", "top"," controversial", "rising"]
+        sort_types = ["hot", "new", "top","rising"]
         sort_type = cols[1].selectbox("Sort Type", options=sort_types, index=0)
         # Set post limit
         post_limit = cols[2].number_input("Limit", min_value=1, max_value=100, value=10, step=1)
@@ -201,7 +204,11 @@ class App:
                 # Create workflow with collector, scraper, and analyzer
                 workflow = Workflow(scraper,analyzer,link_collector=link_collector)
                 
-                with cols[1].status("running workflow..."):
+                with cols[1].status("running workflow...",):
+                    st.write(f"""> Subreddits: {subreddits_names_parsed}\n>\n"""
+                             f"""> Sort Type: {sort_type}\nLimit: {post_limit}\n>\n"""
+                             f"""> Top Time Filter: {top_time_filter}\n>\n"""
+                             f"""> Instruction: {instruction}""")
                     st.write("collecting links...")
                     workflow.clear_store()
                     workflow.collect_links()
@@ -209,7 +216,9 @@ class App:
                     # Scrape posts and show progress
                     scraping_bar = st.progress(0.0, text="Scraping...")
                     acc = 0
-                    links = workflow.get_links().get("link",[]).tolist()
+                    links = workflow.get_links()
+                    links = links["link"].values
+                    
                     for result in workflow.get_scrape_generator(links, overwrite=True):
                         acc += 1
                         scraping_bar.progress(acc/len(links), text=f"Scraping {len(links)} links...")
@@ -232,7 +241,7 @@ class App:
         # Display results if available
         if "export_df" in st.session_state:
             export_df = st.session_state.export_df
-            other_cols = [col for col in export_df.columns if col not in ["links"]]
+            
             col_conf = {
                 "link": st.column_config.LinkColumn(width="small",),
             }
