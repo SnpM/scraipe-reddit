@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# This script clears the Poetry cache until the desired package version is found.
 # Usage: ./check_poetry_package.sh <package> <version>
 
 PACKAGE=$1
