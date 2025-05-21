@@ -118,23 +118,34 @@ class App:
         credentials_box()
                 
         #===Workflow configuration
-        cols = st.columns([.55,.25,.2])
-        # Input for subreddit names
-        subreddit_names = cols[0].text_input("Subreddits", key="subreddit_names", placeholder="Enter subreddit names (e.g. r/bjj)")
-        # Select sorting type for Reddit posts
-        sort_types = ["hot", "new", "top","rising"]
-        sort_type = cols[1].selectbox("Sort Type", options=sort_types, index=0)
-        # Set post limit
-        post_limit = cols[2].number_input("Limit", min_value=1, max_value=100, value=10, step=1)
         
-        # LLM instruction input
-        instruction_help = "Instruction for LLM analysis. Ensure a JSON schema is included."
-        instruction = st.text_area("Instruction", key="instruction", value=self.initial_instruction, help=instruction_help)
-        
-        # Time filter for 'top' sort type
+        subreddit_names = ""
+        sort_type = "hot"
+        post_limit = 10
+        instruction = self.initial_instruction
         top_time_filter = ""
-        if sort_type == "top":
-            top_time_filter = st.selectbox("Time Filter", options=["all", "day", "hour", "month", "week"], index=0)
+        
+        @st.fragment()
+        def workflow_box():        
+            nonlocal subreddit_names, sort_type, post_limit, instruction, top_time_filter
+            cols = st.columns([.55,.25,.2])
+            # Input for subreddit names
+            subreddit_names = cols[0].text_input("Subreddits", key="subreddit_names", placeholder="Enter subreddit names (e.g. r/bjj)")
+            # Select sorting type for Reddit posts
+            sort_types = ["hot", "new", "top","rising"]
+            sort_type = cols[1].selectbox("Sort Type", options=sort_types, index=0)
+            # Set post limit
+            post_limit = cols[2].number_input("Limit", min_value=1, max_value=100, value=10, step=1)
+            
+            # LLM instruction input
+            instruction_help = "Instruction for LLM analysis. Ensure a JSON schema is included."
+            instruction = st.text_area("Instruction", key="instruction", value=self.initial_instruction, help=instruction_help)
+            
+            # Time filter for 'top' sort type
+            top_time_filter = ""
+            if sort_type == "top":
+                top_time_filter = st.selectbox("Time Filter", options=["all", "day", "hour", "month", "week"], index=0)
+        workflow_box()
         
         #===Scrape===
         st.divider()
@@ -208,7 +219,8 @@ class App:
                 
                 with cols[1].status("running workflow...",):
                     st.write(f"""> Subreddits: {subreddits_names_parsed}\n>\n"""
-                             f"""> Sort Type: {sort_type}\nLimit: {post_limit}\n>\n"""
+                             f"""> Sort Type: {sort_type}\n>\n"""
+                             f"""> Limit: {post_limit}\n>\n"""
                              f"""> Top Time Filter: {top_time_filter}\n>\n"""
                              f"""> Instruction: {instruction}""")
                     st.write("collecting links...")
