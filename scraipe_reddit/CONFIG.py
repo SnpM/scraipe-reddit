@@ -16,6 +16,6 @@ if len(unconfigured) > 0:
     logging.warning(f"The following credentials are not configured in the environment. They must be configured in the GUI.\n {', '.join(unconfigured)}")
     
 INSTRUCTION = """
-Extract funny jokes from the reddit post.
+Extract funny jokes from the attached reddit post.
 JSON: {"jokes": ["joke"]}
 """.strip()
