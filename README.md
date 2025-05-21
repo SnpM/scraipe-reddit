@@ -23,10 +23,9 @@ Set the following environment variables to pre-configure scraper and analyzer cr
 
 
 ```bash
-OPENAI_API_KEY
-GEMINI_API_KEY
 REDDIT_CLIENT_ID
 REDDIT_CLIENT_SECRET
+OPENAI_API_KEY
 ```
 
 Then run the demo in Docker:
