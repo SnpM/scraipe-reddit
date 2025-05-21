@@ -17,5 +17,5 @@ if len(unconfigured) > 0:
     
 INSTRUCTION = """
 Extract funny jokes from the attached reddit post.
-JSON: {"jokes": ["joke"]}
+Json schema: {"jokes": ["joke"]}
 """.strip()
